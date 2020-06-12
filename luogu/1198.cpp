@@ -8,6 +8,19 @@ const int inf = 0x7fffffff;
 class Splay {
 public:
     Splay() : mset_(0), root_(0) {
+        int nd = newNode(0, 0);
+        nd = newNode(nd, 1);
+    }
+
+    int newNode(int fa, int d) {
+        int nd = ++mset_;
+        if (fa) {
+            t[fa].ch[d] = nd;
+        }
+        t[nd].size = t[nd].cnt = 1;
+        t[nd].fa = fa;
+        splay(nd, 0);
+        return nd;
     }
 
     int get(int x) {
