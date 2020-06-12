@@ -3,7 +3,7 @@ Language:        Cpp
 BasedOnStyle:  Google
 PointerAlignment: Right
 AccessModifierOffset: -4
-AllowShortFunctionsOnASingleLine: Empty
+AllowShortFunctionsOnASingleLine: None
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
 BreakBeforeBraces: Custom
