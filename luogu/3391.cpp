@@ -1,8 +1,8 @@
 #include <stdio.h>
-#include <cstring>
-#include <cmath>
-#include <vector>
 #include <algorithm>
+#include <cmath>
+#include <cstring>
+#include <vector>
 
 const int maxe = 3e5;
 const int maxl = 1e5 + 10;
@@ -130,11 +130,11 @@ public:
     }
 
     void out(int nd) {
+        if (nd == 0)
+            return;
         down(nd);
         out(t[nd].ch[0]);
-        if (nd > 0) {
-            ans.push_back(t[nd].val);
-        }
+        ans.push_back(t[nd].val);
         out(t[nd].ch[1]);
     }
 } s;
@@ -149,7 +149,7 @@ int main() {
         s.swap(l, r);
     }
     s.out(s.root_);
-    for (int i = 0;i < ans.size(); i++) {
+    for (int i = 1; i < ans.size() - 1; i++) {
         printf("%d%c", ans[i], i == ans.size() - 1 ? '\n' : ' ');
     }
     return 0;
