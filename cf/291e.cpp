@@ -73,19 +73,37 @@ void dfs2(int u, int keep) {
     }
 
     // answer
-    int m = t.length();
-    int hh = suf[0];
-    ans += cnt[m][hh];
+    int tl = t.length();
+    int hh = 0;
+    if (s[u].length() >= tl) {
+        for (int i = 0; i < tl; i++) {
+            hh = ((ll)hh * 233 + s[u][i]) % mod;
+        }
+    }
+
+    int pp = pow(233, tl - 1);
     for (int i = 0; i < s[u].length(); i++) {
         int l = s[u].length() - i;
-        if (l > t.length())
-            continue;
+        if (l >= t.length()) {
+            if (hh == suf[0]) {
+                ans++;
+            }
 
-        assert(l > 0);
+            if (i + tl < s[u].length()) {
+                int x = (ll)s[u][i] * pp % mod;
+                hh = (hh - x + mod) % mod;
+                hh = ((ll)hh * 233 + s[u][i + tl]) % mod;
+            }
+            continue;
+        }
+
         if (suf_s[u][i] == pre[l - 1]) {
-            int len = t.length() - l;
-            int hh = suf[l];
-            ans += len == 0 ? 1 : cnt[len][hh];
+            int len = tl - l;
+            int h2 = suf[l];
+            printf("%d %d %d\n", u, i, cnt[len][h2]);
+            if (cnt[len][h2] > 0) {
+            }
+            ans = (ans + cnt[len][h2]) % mod;
         }
     }
 
