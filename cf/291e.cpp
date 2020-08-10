@@ -1,9 +1,9 @@
 #include <cstdio>
-#include <iostream>
 #include <cstring>
+#include <iostream>
 #include <string>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 using namespace std;
 
@@ -68,8 +68,11 @@ void dfs2(int u, int keep) {
         dfs2(son[u], 1);
 
     for (int v : adj[u]) {
-        if (v != son[u])
+        if (v != son[u]) {
             add(v, 0, 0, 1);
+        } else {
+            add2(v, 0, 0);
+        }
     }
 
     // answer
