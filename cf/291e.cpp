@@ -70,8 +70,6 @@ void dfs2(int u, int keep) {
     for (int v : adj[u]) {
         if (v != son[u]) {
             add(v, 0, 0, 1);
-        } else {
-            add2(v, 0, 0);
         }
     }
 
