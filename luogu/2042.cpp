@@ -131,7 +131,7 @@ public:
             root_ = x;
     }
 
-    void select(int k, int fa) {
+    int select(int k, int fa) {
         int nd = root_;
         while (true) {
             down(nd);
@@ -147,6 +147,7 @@ public:
         }
 
         splay(nd, fa);
+        return nd;
     }
 
     void insert(int p, int a[], int n) {
@@ -156,50 +157,40 @@ public:
             tail = newNode(tail, 1, a[i]);
         }
 
-        select(p + 1, 0);
-        select(p + 2, root_);
-
-        int rc = t[root_].ch[1];
-        t[rc].ch[0] = head;
-        t[head].fa = rc;
-
+        int l = select(p + 1, 0);
+        int r = select(p + 2, l);
+        t[r].ch[0] = head;
+        t[head].fa = r;
         splay(tail, 0);
     }
 
     void del(int p, int n) {
-        select(p, 0);
-        select(p + n + 1, root_);
-        int rc = t[root_].ch[1];
-        t[rc].ch[0] = 0;
-        splay(rc, 0);
+        int l = select(p, 0);
+        int r = select(p + n + 1, l);
+        t[r].ch[0] = 0;
+        splay(r, 0);
     }
 
     void modify(int p, int n, int c) {
-        select(p, 0);
-        select(p + n + 1, root_);
-        int rc = t[root_].ch[1];
-        int x = t[rc].ch[0];
-        t[x].same = true;
-        t[x].val = c;
-        splay(x, 0);
+        int l = select(p, 0);
+        int r = select(p + n + 1, l);
+        t[t[r].ch[0]].same = true;
+        t[t[r].ch[0]].val = c;
+        splay(t[r].ch[0], 0);
     }
 
     void reverse(int p, int n) {
-        select(p, 0);
-        select(p + n + 1, root_);
-        int rc = t[root_].ch[1];
-        int x = t[rc].ch[0];
-        t[x].rev ^= 1;
-        splay(x, 0);
+        int l = select(p, 0);
+        int r = select(p + n + 1, l);
+        t[t[r].ch[0]].rev ^= 1;
+        splay(t[r].ch[0], 0);
     }
 
     int sum(int p, int n) {
-        select(p, 0);
-        select(p + n + 1, root_);
-        int rc = t[root_].ch[1];
-        int x = t[rc].ch[0];
-        down(x);
-        return t[x].sum;
+        int l = select(p, 0);
+        int r = select(p + n + 1, l);
+        down(t[r].ch[0]);
+        return t[t[r].ch[0]].sum;
     }
 
     int maxSum() {
