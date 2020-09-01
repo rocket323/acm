@@ -1,13 +1,13 @@
 #include <stdio.h>
-#include <cstring>
-#include <cmath>
 #include <algorithm>
+#include <cmath>
+#include <cstring>
 
 using namespace std;
 
 const int maxl = 7 * 1e5;
-const int maxe = 1e6;
-const int inf = 0x7fffffff;
+const int maxe = 5 * 1e6;
+const int inf = 0x1f3f3f3f;
 
 int n, m, a[maxl], b[maxl], p, tot, c;
 char op[20];
@@ -27,6 +27,8 @@ public:
     int root_;
 
     Splay() : mset_(0), root_(0) {
+        memset(&t[0], 0, sizeof(Node));
+        t[0].val = t[0].lsum = t[0].rsum = t[0].max_sum = -inf;
         int nd = newNode(0, 0, -inf);
         nd = newNode(nd, 1, -inf);
         splay(nd, 0);
@@ -102,6 +104,9 @@ public:
     void rotate(int x) {
         int fa = t[x].fa, gfa = t[fa].fa;
         int d1 = get(x), d2 = get(fa);
+        down(t[x].ch[0]);
+        down(t[x].ch[1]);
+        down(t[fa].ch[d1 ^ 1]);
         attach(t[x].ch[d1 ^ 1], fa, d1);
         attach(x, gfa, d2);
         attach(fa, x, d1 ^ 1);
@@ -131,7 +136,7 @@ public:
         while (true) {
             down(nd);
             int son = t[nd].ch[0];
-            if (k <= t[son].size)  {
+            if (k <= t[son].size) {
                 nd = son;
             } else if (k > t[son].size + 1) {
                 k -= t[son].size + 1;
@@ -144,15 +149,6 @@ public:
         splay(nd, fa);
     }
 
-    void out(int nd) {
-        if (nd == 0)
-            return;
-        down(nd);
-        out(t[nd].ch[0]);
-        printf("%d ", t[nd].val);
-        out(t[nd].ch[1]);
-    }
-
     void insert(int p, int a[], int n) {
         int head = 0, tail = 0;
         head = tail = newNode(0, 1, a[0]);
@@ -162,7 +158,7 @@ public:
 
         select(p + 1, 0);
         select(p + 2, root_);
-        
+
         int rc = t[root_].ch[1];
         t[rc].ch[0] = head;
         t[head].fa = rc;
@@ -218,8 +214,6 @@ int main() {
         scanf("%d", &a[i]);
     }
     s.insert(0, a, n);
-    s.out(s.root_);
-    puts("");
 
     for (int j = 1; j <= m; j++) {
         scanf("%s", op);
@@ -244,10 +238,6 @@ int main() {
         } else if (strcmp(op, "MAX-SUM") == 0) {
             printf("%d\n", s.maxSum());
         }
-
-        printf("%s\n", op);
-        s.out(s.root_);
-        puts("");
     }
 
     return 0;
