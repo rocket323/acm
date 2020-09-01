@@ -10,21 +10,26 @@ const int inf = 0x7fffffff;
 
 int n, m;
 std::vector<int> ans;
+int a[maxl];
 
 class Splay {
 public:
     struct Node {
         int ch[2];
-        int size, val, fa;
-        int flag;
+        int size, fa;
+        bool rev;
+        int val;
     } t[maxe];
 
     int mset_;
     int root_;
 
     Splay() : mset_(0), root_(0) {
+        memset(&t[0], 0, sizeof(Node));
+        t[0].val = -inf;
         int nd = newNode(0, 0, -inf);
         nd = newNode(nd, 1, -inf);
+        splay(nd, 0);
     }
 
     int newNode(int fa, int d, int val) {
@@ -32,11 +37,11 @@ public:
         if (fa) {
             t[fa].ch[d] = nd;
         }
+        t[nd].ch[0] = t[nd].ch[1] = 0;
         t[nd].size = 1;
         t[nd].fa = fa;
+        t[nd].rev = false;
         t[nd].val = val;
-        t[nd].flag = 0;
-        splay(nd, 0);
         return nd;
     }
 
@@ -45,16 +50,21 @@ public:
     }
 
     void up(int x) {
-        t[x].size = t[t[x].ch[0]].size + t[t[x].ch[1]].size + 1;
+        Node *p = &t[x], *lc = &t[t[x].ch[0]], *rc = &t[t[x].ch[1]];
+        p->size = lc->size + rc->size + 1;
     }
 
-    void down(int nd) {
-        if (nd == 0 || !t[nd].flag)
+    void down(int x) {
+        if (x == 0)
             return;
-        t[nd].flag = 0;
-        t[t[nd].ch[0]].flag ^= 1;
-        t[t[nd].ch[1]].flag ^= 1;
-        std::swap(t[nd].ch[0], t[nd].ch[1]);
+
+        Node *p = &t[x], *lc = &t[t[x].ch[0]], *rc = &t[t[x].ch[1]];
+        if (p->rev) {
+            p->rev = false;
+            lc->rev ^= 1;
+            rc->rev ^= 1;
+            std::swap(p->ch[0], p->ch[1]);
+        }
     }
 
     void attach(int x, int fa, int d) {
@@ -65,6 +75,9 @@ public:
     void rotate(int x) {
         int fa = t[x].fa, gfa = t[fa].fa;
         int d1 = get(x), d2 = get(fa);
+        down(t[x].ch[0]);
+        down(t[x].ch[1]);
+        down(t[fa].ch[d1 ^ 1]);
         attach(t[x].ch[d1 ^ 1], fa, d1);
         attach(x, gfa, d2);
         attach(fa, x, d1 ^ 1);
@@ -73,6 +86,7 @@ public:
     }
 
     void splay(int x, int goal) {
+        down(x);
         while (t[x].fa != goal) {
             int fa = t[x].fa, gfa = t[fa].fa;
             int d1 = get(x), d2 = get(fa);
@@ -88,10 +102,8 @@ public:
             root_ = x;
     }
 
-    int kth(int k) {
+    int select(int k, int fa) {
         int nd = root_;
-        if (nd == 0 || t[nd].size < k)
-            return nd;
         while (true) {
             down(nd);
             int son = t[nd].ch[0];
@@ -101,48 +113,52 @@ public:
                 k -= t[son].size + 1;
                 nd = t[nd].ch[1];
             } else {
-                return nd;
+                break;
             }
         }
+
+        splay(nd, fa);
+        return nd;
     }
 
-    int size() {
-        return t[root_].size - 2;
+    void insert(int p, int a[], int n) {
+        int head = 0, tail = 0;
+        head = tail = newNode(0, 1, a[0]);
+        for (int i = 1; i < n; i++) {
+            tail = newNode(tail, 1, a[i]);
+        }
+
+        int l = select(p + 1, 0);
+        int r = select(p + 2, l);
+        t[r].ch[0] = head;
+        t[head].fa = r;
+        splay(tail, 0);
     }
 
-    void append(int val) {
-        insert(val, size());
+    void swap(int a, int b) {
+        int l = select(a, 0);
+        int r = select(b + 2, l);
+        t[t[r].ch[0]].rev ^= 1;
+        splay(t[r].ch[0], 0);
     }
 
-    void insert(int val, int p) {
-        int x = kth(p + 1), y = kth(p + 1 + 1);
-        splay(x, 0);
-        splay(y, x);
-        newNode(y, 0, val);
-    }
-
-    void swap(int l, int r) {
-        int x = kth(l - 1 + 1), y = kth(r + 1 + 1);
-        splay(x, 0);
-        splay(y, x);
-        int nd = t[y].ch[0];
-        t[nd].flag ^= 1;
-    }
-
-    void out(int nd) {
-        if (nd == 0)
+    void out(int x) {
+        if (x == 0)
             return;
-        down(nd);
-        out(t[nd].ch[0]);
-        ans.push_back(t[nd].val);
-        out(t[nd].ch[1]);
+        down(x);
+        out(t[x].ch[0]);
+        ans.push_back(t[x].val);
+        out(t[x].ch[1]);
     }
 } s;
 
 int main() {
     scanf("%d%d", &n, &m);
-    for (int i = 1; i <= n; i++)
-        s.append(i);
+    for (int i = 0; i < n; i++) {
+        a[i] = i + 1;
+    }
+    s.insert(0, a, n);
+
     for (int i = 0; i < m; i++) {
         int l, r;
         scanf("%d%d", &l, &r);
