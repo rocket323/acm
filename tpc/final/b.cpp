@@ -9,58 +9,6 @@ int t;
 bool vis[maxl];
 char a[4][4], b[4][4];
 
-bool check(char a[][4]) {
-    int lines = 0;
-    for (int i = 0; i < 4; i++) {
-        int x = 0;
-        for (int j = 0; j < 4; j++) {
-            if (a[i][j] == '#')
-                x++;
-        }
-        if (x == 4)
-            lines++;
-    }
-
-    for (int j = 0; j < 4; j++) {
-        int x = 0;
-        for (int i = 0; i < 4; i++) {
-            if (a[i][j] == '#')
-                x++;
-        }
-        if (x == 4)
-            lines++;
-    }
-
-    int x = 0;
-    for (int i = 0; i < 4; i++) {
-        if (a[i][i] == '#')
-            x++;
-    }
-    if (x == 4)
-        lines++;
-
-    x = 0;
-    for (int i = 0; i < 4; i++) {
-        if (a[i][3 - i] == '#')
-            x++;
-    }
-    if (x == 4)
-        lines++;
-
-    return lines >= 3;
-}
-
-int calc(char a[][4]) {
-    int x = 0;
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            int y = (a[i][j] == '#') ? 1 : 0;
-            x = x * 2 + y;
-        }
-    }
-    return x;
-}
-
 void paint(int n) {
     if (n <= 4) {
         for (int i = 0; i < 4; i++)
