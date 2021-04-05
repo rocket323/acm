@@ -42,12 +42,15 @@ int main() {
                         int v = f[i][l][r][s];
                         if (i == n - 1 && l == m - 1 && r == m - 1)
                             ans = max(ans, v);
+                        // printf("%d %d %d %d: %d\n", i, l, r, s, f[i][l][r][s]);
 
                         if (l + 1 < s || (i == n - 1 && s == m - 1))
                             update(f[i][l+1][r][s], v + a[i][l+1]);
 
-                        update(f[i][l][r+1][s], v + a[i][r+1]);
-                        if (l != r)
+                        if (r + 1 < m)
+                            update(f[i][l][r+1][s], v + a[i][r+1]);
+
+                        if (i + 1 < n)
                             update(f[i+1][l][r][r], v + a[i+1][l] + a[i+1][r]);
                     }
                 }
@@ -58,3 +61,4 @@ int main() {
 
     return 0;
 }
+
