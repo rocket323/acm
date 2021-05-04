@@ -1,4 +1,8 @@
-#include <bits/stdc++.h>
+#include <stdio.h>
+#include <cmath>
+#include <cstring>
+#include <vector>
+#include <set>
 using namespace std;
 
 const int maxl = 5 * 1e5 + 10;
@@ -8,14 +12,7 @@ int n, m, v;
 char s[20];
 multiset<int> s1;
 set<int> s2;
-set<int> b;
-
-void out(const set<int> &s) {
-    for (int x : s) {
-        printf("%d ", x);
-    }
-    puts("");
-}
+multiset<int> b;
 
 void del(int x) {
     s1.erase(s1.lower_bound(x));
@@ -51,12 +48,13 @@ int main() {
             int l = a[x].size() - 1;
 
             s1.insert(abs(a[x][l] - a[x][l - 1]));
-            if (l - 1 > 0) {
-                del(abs(a[x][l - 1] - a[x][l - 2]));
-            }
             if (x < n) {
                 s1.insert(abs(a[x + 1][0] - a[x][l]));
                 del(abs(a[x][l - 1] - a[x + 1][0]));
+            }
+
+            if (*s2.begin() == 0) {
+                continue;
             }
 
             b.insert(y);
