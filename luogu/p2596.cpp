@@ -1,6 +1,6 @@
 #include <bits/stdc++.h>
 using namespace std;
-const int maxl = 2e5 + 10;
+const int maxl = 5e5 + 10;
 const int inf = 0x3f3f3f3f;
 
 int n, m, a[maxl], pos[maxl];
@@ -16,8 +16,9 @@ public:
 
     Splay() : mset_(0), root_(1) {
         memset(&t[0], 0, sizeof(Node));
-        // int nd = newNode(0, 0, -inf);
-        // nd = newNode(nd, 1, -inf);
+        int l = newNode(0, 0, -inf);
+        int r = newNode(l, 1, -inf);
+        up(l);
     }
 
     int newNode(int fa, int d, int val) {
@@ -62,10 +63,7 @@ public:
     }
 
     void splay(int x, int goal) {
-        if (x == 0)
-            return;
-
-        while (t[x].fa != goal) {
+        while (x && t[x].fa != goal) {
             int fa = t[x].fa, gfa = t[fa].fa;
             int d1 = get(x), d2 = get(fa);
             if (gfa != goal) {
@@ -82,7 +80,7 @@ public:
 
     int select(int k, int fa) {
         int nd = root_;
-        while (true) {
+        while (nd) {
             int son = t[nd].ch[0];
             if (k <= t[son].size) {
                 nd = son;
@@ -97,116 +95,81 @@ public:
         return nd;
     }
 
-    void build(int a[], int n) {
-        int head = 0, tail = 0;
-        head = tail = newNode(0, 1, a[1]);
-        pos[a[1]] = head;
-        for (int i = 2; i <= n; i++) {
-            tail = newNode(tail, 1, a[i]);
-            pos[a[i]] = tail;
-        }
-        root_ = head;
-        splay(tail, 0);
+    int pre(int nd) {
+        nd = t[nd].ch[0];
+        while (nd && t[nd].ch[1])
+            nd = t[nd].ch[1];
+        return nd;
+    }
+
+    int succ(int nd) {
+        nd = t[nd].ch[1];
+        while (nd && t[nd].ch[0])
+            nd = t[nd].ch[0];
+        return nd;
+    }
+
+    int del(int nd) {
+        splay(nd, 0);
+        int l = pre(nd), r = succ(nd);
+        splay(l, 0);
+        splay(r, l);
+        t[r].ch[0] = 0;
+        up(r);
+        up(l);
+    }
+
+    void insert(int x, int y) {
+        int l = select(x, 0);
+        int r = select(x + 1, l);
+        int t = newNode(r, 0, y);
+        pos[y] = t;
+        up(r);
+        up(l);
+        splay(t, 0);
     }
 
     void top(int x) {
         int nd = pos[x];
-        splay(nd, 0);
-        int rc = t[nd].ch[1];
-        while (rc && t[rc].ch[0]) {
-            rc = t[rc].ch[0];
-        }
-        if (rc) {
-            splay(rc, nd);
-            attach(t[nd].ch[0], rc, 0);
-            t[nd].ch[0] = 0;
-            up(rc);
-            up(nd);
-        } else {
-            attach(t[nd].ch[0], nd, 1);
-            t[nd].ch[0] = 0;
-            up(nd);
-        }
+        del(nd);
+        insert(1, x);
     }
 
     void bottom(int x) {
         int nd = pos[x];
-        splay(nd, 0);
-        int lc = t[nd].ch[0];
-        while (lc && t[lc].ch[1]) {
-            lc = t[lc].ch[1];
-        }
-        if (lc) {
-            splay(lc, nd);
-            attach(t[nd].ch[1], lc, 1);
-            t[nd].ch[1] = 0;
-            up(lc);
-            up(nd);
-        } else {
-            attach(t[nd].ch[1], nd, 0);
-            t[nd].ch[1] = 0;
-            up(nd);
-        }
+        del(nd);
+        insert(n, x);
     }
 
-    void insert(int x, int y) {
+    void insert2(int x, int y) {
         int nd = pos[x];
-        splay(nd, 0);
-        int lc = t[nd].ch[0];
-        while (lc && t[lc].ch[1]) {
-            lc = t[lc].ch[1];
-        }
-        splay(lc, nd);
-
-        int rc = t[nd].ch[1];
-        while (rc && t[rc].ch[0]) {
-            rc = t[rc].ch[0];
-        }
-        splay(rc, nd);
-
-        if (y == -1) {
-            if (rc) {
-                attach(lc, rc, 0);
-                attach(t[lc].ch[0], nd, 0);
-                t[lc].ch[0] = 0;
-                up(lc);
-                up(rc);
-                up(nd);
-            } else {
-                attach(lc, nd, 1);
-                attach(t[lc].ch[0], nd, 0);
-                t[lc].ch[0] = 0;
-                up(lc);
-                up(nd);
-            }
-        } else if (y == 1) {
-            if (lc) {
-                attach(rc, lc, 1);
-                attach(t[rc].ch[1], nd, 1);
-                t[rc].ch[1] = 0;
-                up(rc);
-                up(lc);
-                up(nd);
-            } else {
-                attach(rc, nd, 0);
-                attach(t[rc].ch[1], nd, 1);
-                t[rc].ch[1] = 0;
-                up(rc);
-                up(nd);
-            }
-        }
+        int p = ask(x) + 1;
+        del(nd);
+        insert(p + y, x);
     }
 
-    void ask(int x) {
+    void build(int a[], int n) {
+        int head = 0, tail = 0;
+        head = tail = newNode(0, 1, a[1]);
+        pos[a[1]] = tail;
+        for (int i = 2; i <= n; i++) {
+            tail = newNode(tail, 1, a[i]);
+            pos[a[i]] = tail;
+        }
+        attach(head, 2, 0);
+        splay(tail, 0);
+    }
+
+    int ask(int x) {
         int nd = pos[x];
         splay(nd, 0);
         nd = t[nd].ch[0];
-        printf("%d\n", t[nd].size);
+        return t[nd].size - 1;
     }
 
-    void query(int x) {
-        int nd = select(x, 0);
-        printf("%d\n", t[nd].val);
+    int query(int x) {
+        int nd = select(x + 1, 0);
+        return t[nd].val;
     }
 
     void _out(int x) {
@@ -228,6 +191,7 @@ int main() {
     scanf("%d%d", &n, &m);
     for (int i = 1; i <= n; i++) {
         scanf("%d", &a[i]);
+        // sp.insert(i, a[i]);
     }
     sp.build(a, n);
     // sp.out();
@@ -243,13 +207,13 @@ int main() {
             sp.bottom(x);
         } else if (strcmp(s, "Insert") == 0) {
             scanf("%d%d", &x, &y);
-            sp.insert(x, y);
+            sp.insert2(x, y);
         } else if (strcmp(s, "Ask") == 0) {
             scanf("%d", &x);
-            sp.ask(x);
+            printf("%d\n", sp.ask(x));
         } else if (strcmp(s, "Query") == 0) {
             scanf("%d", &x);
-            sp.query(x);
+            printf("%d\n", sp.query(x));
         }
         // printf("%s %d %d\n", s, x, y);
         // sp.out();
