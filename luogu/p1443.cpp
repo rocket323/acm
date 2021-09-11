@@ -24,7 +24,7 @@ void solve() {
     push(r, c, 0);
 
     while (!q.empty()) {
-        node &nd = q.front();
+        node nd = q.front();
         q.pop();
         for (int i = 0; i < 8; i++) {
             int rr = nd.r + dr[i];
