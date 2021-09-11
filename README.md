@@ -1,1 +1,1 @@
-a storage for my algorithm code.
+A storage for my algorithm contest code.
