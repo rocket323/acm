@@ -9,14 +9,37 @@ int t, n, m;
 int a[maxl + 10], d[maxl + 10], dd[maxl + 10];
 int f[maxl];
 
-void add(int l, int r, int a0, int D) {
-    d[l] = (d[l] + a0) % mod;
+void add_dd(int l, int x) {
+    dd[l] = (dd[l] + x) % mod;
+}
+
+void add_d(int l, int x) {
+    d[l] = (d[l] + x) % mod;
+}
+
+void add_d(int l, int r, int x) {
+    add_dd(l, x);
+    add_dd(r + 1, mod - x % mod);
+}
+
+void add(int l, int r, int a0, int d) {
+    add_d(l, a0);
     if (l < r) {
-        dd[l + 1] = (dd[l + 1] + D) % mod;
-        dd[r + 1] = (dd[r + 1] + mod - D % mod) % mod;
+        add_d(l + 1, r, d);
     }
-    int x = ((ll)a0 + (ll)D * (r - l)) % mod;
-    d[r + 1] = (d[r + 1] + mod - x % mod) % mod;
+    int x = ((ll)a0 + (ll)d * (r - l)) % mod;
+    add_d(r + 1, mod - x % mod);
+}
+
+void add(int l, int x) {
+    a[l] = (a[l] + x) % mod;
+}
+
+void out(int a[]) {
+    for (int i = 0; i < 5; i++) {
+        printf("%d ", a[i]);
+    }
+    puts("");
 }
 
 void sumup() {
@@ -41,18 +64,16 @@ int main() {
 
     while (t--) {
         scanf("%d%d", &n, &m);
-        for (int i = 0; i <= n + m; i++) {
-            a[i] = d[i] = dd[i] = 0;
-        }
+        memset(a, 0, sizeof(a));
+        memset(d, 0, sizeof(d));
+        memset(dd, 0, sizeof(dd));
+
         for (int i = 1; i < n; i++) {
-            a[i] = (a[i] + (ll)(n - i) * m % mod) % mod;
-            if (m > 1) {
-                add(i + 1, i + m - 1, (ll)2 * (n - i) * (m - 1) % mod, mod - 2 * (n - i) % mod);
-            }
+            add(i + 0, i + m - 1, (ll)2 * (n - i) * m % mod, mod - 2 * (n - i) % mod);
         }
 
         for (int i = 1; i < m; i++) {
-            a[i] = (a[i] + (ll)n * (m - i) % mod) % mod;
+            add(i, (ll)n * (m - i) % mod);
         }
 
         sumup();

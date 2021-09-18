@@ -9,13 +9,13 @@ ll ans, A, B, C;
 const ll inf = 1e18;
 
 ll f(ll i) {
-    if (i > 0 && A > 0 && x / A / i / i < 1)
+    if (i > 0 && A > 0 && x * 2 / A / i / i < 1)
         return inf;
     ll ans = A * i * i;
-    if (i > 0 && B > 0 && x / B / i < 1)
+    if (i > 0 && B > 0 && x * 2 / B / i < 1)
         return inf;
     ans += B * i;
-    if (ans > x)
+    if (ans > x * 2)
         return inf;
     ans += C;
     return ans;
@@ -23,7 +23,6 @@ ll f(ll i) {
 
 ll gao(ll n) {
     A = b + d;
-
     B = 2 * a - b - (n * d + 2 * c + (n - 1) * d);
     C = n * (2 * c + (n - 1) * d);
 
@@ -45,7 +44,7 @@ ll gao(ll n) {
 }
 
 ll solve() {
-    ll l = 1, r = 4e9;
+    ll l = 0, r = 1e15;
     ll ans = 0;
     while (l <= r) {
         ll mid = (l + r) / 2;
@@ -79,4 +78,3 @@ int main() {
 
     return 0;
 }
-
