@@ -39,8 +39,7 @@ void dfs(int u, int p, int dep, int idx) {
     }
 }
 
-int main()
-{
+int main() {
     scanf("%d", &n);
     for (int i = 1; i < n; i++) {
         scanf("%d%d", &u, &v);
