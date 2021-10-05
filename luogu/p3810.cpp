@@ -1,3 +1,4 @@
+// cdq
 #include <stdio.h>
 #include <cstring>
 #include <algorithm>
