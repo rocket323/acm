@@ -20,10 +20,10 @@ struct node1 {
 
 struct node {
     int l, r;
-    int sp, xp;
+    int x, cnt;
 } ndx[maxl * 4], ndy[maxl * 4];
 
-int n, m, p[maxl], e[maxl], c[maxl], rc[maxl];
+int n, m, e[maxl], c[maxl], rc[maxl];
 int tp, te, t, rev;
 
 bool cmp(const node1 &a, const node1 &b) {
@@ -33,7 +33,8 @@ bool cmp(const node1 &a, const node1 &b) {
 void build(node nd[], int now, int l, int r) {
     nd[now].l = l;
     nd[now].r = r;
-    nd[now].sp = nd[now].xp = 0;
+    nd[now].x = 0;
+    nd[now].cnt = 0;
     if (l < r) {
         int mid = (l + r) / 2;
         build(nd, now * 2, l, mid);
@@ -45,32 +46,34 @@ void inc(int &a, int b) {
     a = (a + b % mod) % mod;
 }
 
-void add(node nd[], int now, int l, int r, int sp, int xp) {
+void add(node nd[], int now, int l, int r, int x) {
     if (l <= nd[now].l && nd[now].r <= r) {
-        inc(nd[now].sp, sp);
-        inc(nd[now].xp, xp);
+        inc(nd[now].x, x);
+        inc(nd[now].cnt, 1);
         return;
     }
     int mid = (nd[now].l + nd[now].r) / 2;
-    if (l <= mid) add(nd, now * 2, l, r, sp, xp);
-    if (r > mid) add(nd, now * 2 + 1, l, r, sp, xp);
-    nd[now].sp = (nd[now*2].sp + nd[now*2+1].sp) % mod;
-    nd[now].xp = (nd[now*2].xp + nd[now*2+1].xp) % mod;
+    if (l <= mid)
+        add(nd, now * 2, l, r, x);
+    if (r > mid)
+        add(nd, now * 2 + 1, l, r, x);
+    nd[now].x = (nd[now * 2].x + nd[now * 2 + 1].x) % mod;
+    nd[now].cnt = (nd[now * 2].cnt + nd[now * 2 + 1].cnt) % mod;
 }
 
-void query(node nd[], int now, int l, int r, int &sp, int &xp) {
+void query(node nd[], int now, int l, int r, int &x, int &c) {
     if (l <= nd[now].l && nd[now].r <= r) {
-        inc(sp, nd[now].sp);
-        inc(xp, nd[now].xp);
+        inc(x, nd[now].x);
+        inc(c, nd[now].cnt);
         return;
     }
 
     int mid = (nd[now].l + nd[now].r) / 2;
     if (l <= mid) {
-        query(nd, now * 2, l, r, sp, xp);
+        query(nd, now * 2, l, r, x, c);
     }
     if (r > mid) {
-        query(nd, now * 2 + 1, l, r, sp, xp);
+        query(nd, now * 2 + 1, l, r, x, c);
     }
 }
 
@@ -80,19 +83,17 @@ int pow(int a, int n) {
         if (n & 1) {
             ans = ((ll)ans * t) % mod;
         }
-        t = ((ll)t * t) %mod;
+        t = ((ll)t * t) % mod;
         n >>= 1;
     }
     return ans;
 }
 
 void add(int j) {
-    p[j] = ((ll)(1 + p[j]) * rc[j]) % mod;
-    inc(tp, p[j]);
     inc(te, e[j]);
 
-    add(ndx, 1, nd2[j].r, nd2[j].r, p[j], (ll)nd2[j].r * p[j] % mod);
-    add(ndy, 1, nd2[j].c, nd2[j].c, p[j], (ll)nd2[j].c * p[j] % mod);
+    add(ndx, 1, nd2[j].r, nd2[j].r, (ll)nd2[j].r);
+    add(ndy, 1, nd2[j].c, nd2[j].c, (ll)nd2[j].c);
 }
 
 int main() {
@@ -102,7 +103,6 @@ int main() {
         int idx = 0;
         tp = te = 0;
         memset(e, 0, sizeof e);
-        memset(p, 0, sizeof p);
         build(ndx, 1, 0, maxl);
         build(ndy, 1, 0, maxl);
 
@@ -119,57 +119,48 @@ int main() {
 
         c[tot] = 0;
         rc[tot] = 0;
-        for (int i = tot-1; i>= 1; i--) {
-            if (nd2[i].a == nd2[i+1].a)
-                c[i] = c[i+1];
+        for (int i = tot - 1; i >= 1; i--) {
+            if (nd2[i].a == nd2[i + 1].a)
+                c[i] = c[i + 1];
             else
-                c[i] = c[i+1] + 1;
+                c[i] = c[i + 1] + 1;
 
             rc[i] = pow(c[i], mod - 2);
         }
-        for (int i = 1; i <= tot; i++) {
-            // printf("%d %d\n", i, c[i]);
-        }
 
-        rev = pow(n * m, mod - 2);
-        int last = 0, ans = 0;
-        for (int i = 1; i <= tot; i++) {
-            while (last + 1 <= tot && nd2[last+1].a < nd2[i].a) {
-                add(last + 1);
-                last++;
+        int last = tot + 1, ans = 0;
+        for (int i = tot; i >= 1; i--) {
+            while (last - 1 > i && nd2[last - 1].a > nd2[i].a) {
+                add(last - 1);
+                last--;
             }
 
-            p[i] = (p[i] + tp) % mod;
-            e[i] = (e[i] + te) % mod;
+            if (c[i] == 0)
+                continue;
 
-            int sumr = 0;
-            int sp = 0, xp = 0;
-            query(ndx, 1, nd2[i].r + 1, maxl, sp, xp);
-            inc(sumr, mod + xp - (ll)nd2[i].r * sp % mod);
+            int pi = rc[i];
+            int sum = te;
+            int sx = 0, sc = 0;
+            query(ndx, 1, nd2[i].r + 1, maxl, sx, sc);
+            inc(sum, mod + sx - (ll)sc * nd2[i].r % mod);
 
-            sp = 0, xp = 0;
-            query(ndx, 1, 0, nd2[i].r, sp, xp);
-            inc(sumr, mod + (ll)nd2[i].r * sp - xp % mod);
+            sx = 0, sc = 0;
+            query(ndx, 1, 0, nd2[i].r, sx, sc);
+            inc(sum, mod + (ll)sc * nd2[i].r % mod - sx);
 
-            int sumc = 0;
-            sp = 0;
-            int yp = 0;
-            query(ndy, 1, nd2[i].c + 1, maxl, sp, yp);
-            inc(sumr, mod + yp - (ll)nd2[i].c * sp % mod);
+            sx = 0, sc = 0;
+            query(ndy, 1, nd2[i].c + 1, maxl, sx, sc);
+            inc(sum, mod + sx - (ll)sc * nd2[i].c % mod);
 
-            sp = 0, yp = 0;
-            query(ndy, 1, 0, nd2[i].r, sp, yp);
-            inc(sumr, mod + (ll)nd2[i].c * sp - yp % mod);
+            sx = 0, sc = 0;
+            query(ndy, 1, 0, nd2[i].c, sx, sc);
+            inc(sum, mod + (ll)sc * nd2[i].c % mod - sx);
 
-            inc(e[i], (sumr + sumc) % mod);
-
-            if (nd2[i].a == nd2[tot].a) {
-                inc(ans, e[i]);
-            }
+            e[i] = (ll)pi * sum % mod;
+            inc(ans, e[i]);
         }
 
         printf("%d\n", ans);
     }
     return 0;
 }
-
