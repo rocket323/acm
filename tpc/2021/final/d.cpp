@@ -23,7 +23,7 @@ struct node {
     int x, cnt;
 } ndx[maxl * 4], ndy[maxl * 4];
 
-int n, m, e[maxl], c[maxl], rc[maxl];
+int n, m, e[maxl], c[maxl], rc[maxl], br[maxl], tr, tc, bc[maxl];
 int tp, te, t, rev;
 
 bool cmp(const node1 &a, const node1 &b) {
@@ -102,10 +102,8 @@ int main() {
         scanf("%d%d", &n, &m);
         int idx = 0;
         tp = te = 0;
-        memset(e, 0, sizeof e);
-        build(ndx, 1, 0, maxl);
-        build(ndy, 1, 0, maxl);
 
+        tr = tc = 0;
         for (int i = 1; i <= n; i++) {
             for (int j = 1; j <= m; j++) {
                 idx++;
@@ -115,7 +113,12 @@ int main() {
             }
         }
         int tot = idx;
+        for (int i = 0; i <= tot; i++)
+            e[i] = 0;
         sort(nd2 + 1, nd2 + tot + 1, cmp);
+
+        build(ndx, 1, 0, n);
+        build(ndy, 1, 0, m);
 
         c[tot] = 0;
         rc[tot] = 0;
@@ -141,7 +144,7 @@ int main() {
             int pi = rc[i];
             int sum = te;
             int sx = 0, sc = 0;
-            query(ndx, 1, nd2[i].r + 1, maxl, sx, sc);
+            query(ndx, 1, nd2[i].r + 1, n, sx, sc);
             inc(sum, mod + sx - (ll)sc * nd2[i].r % mod);
 
             sx = 0, sc = 0;
@@ -149,7 +152,7 @@ int main() {
             inc(sum, mod + (ll)sc * nd2[i].r % mod - sx);
 
             sx = 0, sc = 0;
-            query(ndy, 1, nd2[i].c + 1, maxl, sx, sc);
+            query(ndy, 1, nd2[i].c + 1, m, sx, sc);
             inc(sum, mod + sx - (ll)sc * nd2[i].c % mod);
 
             sx = 0, sc = 0;
