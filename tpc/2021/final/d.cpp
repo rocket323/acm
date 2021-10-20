@@ -126,7 +126,7 @@ int main() {
             if (nd2[i].a == nd2[i + 1].a)
                 c[i] = c[i + 1];
             else
-                c[i] = c[i + 1] + 1;
+                c[i] = tot - i;
 
             rc[i] = pow(c[i], mod - 2);
         }
