@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 using namespace std;
-using ll = unsigned  long long;
+using ll = unsigned long long;
 
 const int inf = 0x3f3f3f3f;
 const int maxl = 1e5 + 10;
@@ -37,7 +37,6 @@ int main() {
     for (int j = i; j >= 0; j--)
         printf("%d", ans[j]);
     puts("");
-    
+
     return 0;
 }
-

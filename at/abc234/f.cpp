@@ -26,7 +26,7 @@ int main() {
     for (int i = 1; i < maxl; i++) {
         g[i][0] = g[i][i] = 1;
         for (int j = 1; j < i; j++) {
-            g[i][j] = (g[i-1][j-1] + g[i-1][j]) % mod;
+            g[i][j] = (g[i - 1][j - 1] + g[i - 1][j]) % mod;
         }
     }
 
@@ -42,12 +42,12 @@ int main() {
             if (f[i][j] == 0)
                 continue;
 
-            add(f[i+1][j], f[i][j]);
-            for (int k = 1; k <= c[i+1]; k++) {
-                ll t = g[j+k][k];
-                add(f[i+1][j + k], (ll)f[i][j] * t % mod);
+            add(f[i + 1][j], f[i][j]);
+            for (int k = 1; k <= c[i + 1]; k++) {
+                ll t = g[j + k][k];
+                add(f[i + 1][j + k], (ll)f[i][j] * t % mod);
             }
-        } 
+        }
     }
 
     int ans = 0;
@@ -58,4 +58,3 @@ int main() {
 
     return 0;
 }
-
