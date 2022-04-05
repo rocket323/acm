@@ -1,0 +1,269 @@
+#include <stdio.h>
+#include <cstring>
+#include <vector>
+#include <queue>
+#include <map>
+#include <algorithm>
+#define maxl 67010
+#define TOT (2*n*(n+1))
+#define ll long long
+#define INF 0x3f3f3f3f
+using namespace std;
+
+struct node
+{
+	ll st;
+	int cost;
+	node(ll _st, int _cost) : st(_st), cost(_cost) {}
+};
+
+struct cmp
+{
+	bool operator()(node A, node B)
+	{
+		return A.cost > B.cost;
+	}
+};
+
+struct LIN
+{
+	int r1, c1, r2, c2;
+}lin[maxl];
+
+struct SQR
+{
+	int r1, c1, r2, c2;
+}sqr[maxl];
+
+int n, top, l, del[maxl], pre_cover;
+bool cover[maxl];
+vector<int> adj[maxl], list;
+priority_queue<node, vector<node>, cmp> pq;
+
+bool check(int a, int b)
+{
+	if(lin[a].r1 == lin[a].r2 && (lin[a].r1 == sqr[b].r1 || lin[a].r1 == sqr[b].r2))
+	{
+		return (sqr[b].c1 <= lin[a].c1 && lin[a].c2 <= sqr[b].c2);
+	}
+	else if(lin[a].c1 == lin[a].c2 && (lin[a].c1 == sqr[b].c1 || lin[a].c1 == sqr[b].c2))
+	{
+		return (sqr[b].r1 <= lin[a].r1 && lin[a].r2 <= sqr[b].r2);
+	}
+	return 0;
+}
+
+void init()
+{
+	scanf("%d", &n);
+	scanf("%d", &l);
+	for(int i=0; i<l; ++i)
+	{
+		int a;
+		scanf("%d", &a);
+		del[a] = 1;
+	}
+	list.clear();
+	for(int i=0; i<TOT; ++i) if(!del[i]) list.push_back(i);
+
+	for(int i=0; i<2*n*(n+1); ++i)
+	{
+		int x = i;
+		if(x >= (2 * n + 1) * n)
+		{
+			lin[i].r1 = lin[i].r2 = n;
+			lin[i].c1 = x % (2 * n + 1);
+			lin[i].c2 = lin[i].c1 + 1;
+		}
+		else
+		{
+			int mod = (2 * n + 1);
+			if(x % mod < n)
+			{
+				lin[i].r1 = lin[i].r2 = x / mod;
+				lin[i].c1 = x % mod;
+				lin[i].c2 = lin[i].c1 + 1;
+			}
+			else
+			{
+				lin[i].c1 = lin[i].c2 = x % mod - n;
+				lin[i].r1 = x / mod;
+				lin[i].r2 = lin[i].r1 + 1;
+			}
+		}
+	}
+
+	top = 0;
+	for(int r1=0; r1<=n; ++r1)
+	for(int c1=0; c1<=n; ++c1)
+	for(int len=1; len<=n && r1+len<=n && c1+len<=n; ++len)
+	{
+		int r2 = r1 + len, c2 = c1 + len;
+		sqr[top].r1 = r1, sqr[top].c1 = c1;
+		sqr[top].r2 = r2, sqr[top].c2 = c2;
+		top++;
+	}
+
+	//printf("%d %d %d\n", n, TOT, top);
+
+	for(int i=0; i<TOT; ++i)
+	{
+		adj[i].clear();
+		for(int j=0; j<top; ++j)
+		{
+			if(check(i, j)) adj[i].push_back(j);
+		}
+	}
+
+	pre_cover = 0;
+	memset(cover, 0, sizeof cover);
+	for(int i=0; i<TOT; ++i) if(del[i])
+	{
+		for(int j=0; j<adj[i].size(); ++j)
+		{
+			if(!cover[adj[i][j]])
+			{
+				cover[adj[i][j]] = 1;
+				pre_cover++;
+			}
+		}
+	}
+}
+
+int t_s[maxl], t_c;
+bool vis[maxl];
+vector<int> sz;
+map<ll, int> mp;
+map<ll, int> :: iterator it;
+#define contain(x,y) (x & (1LL<<y))
+
+void debug()
+{
+	/*
+	for(int i=0; i<2*n*(n+1); ++i)
+	{
+		printf("%d %d %d %d %d\n", i, lin[i].r1, lin[i].c1, lin[i].r2, lin[i].c2);
+	}
+
+	puts("");
+	
+	for(int i=0; i<TOT; ++i)
+	{
+		printf("%d : ", i);
+		for(int j=0; j<adj[i].size(); ++j)
+		{
+			printf("%d ", adj[i][j]);
+		}
+		puts("");
+	}
+	*/
+}
+
+int analyse(ll st, bool vis[])
+{
+	int ans= 0;
+	for(int i=0; i<top; ++i) vis[i] = cover[i];
+
+	for(int i=0; i<list.size(); ++i)
+	{
+		if(!contain(st, i)) continue;
+		for(int j=0; j<adj[list[i]].size(); ++j)
+		{
+			int k = adj[list[i]][j];
+			if(!vis[k])
+			{
+				t_c++;
+				vis[k] = 1;
+			}
+		}
+	}
+	for(int i=0; i<top; ++i) ans += vis[i];
+	return ans;
+}
+
+bool cmp2(int a, int b){ return a > b; }
+
+int calc_exp(ll st, bool vis[])
+{
+	int left = top;
+	for(int i=0; i<top; ++i) left -= vis[i];
+	sz.clear();
+
+	if(left == 0) return 0;
+
+	for(int i=0; i<list.size(); ++i)
+	{
+		if(contain(st, i)) continue;
+		sz.push_back(list.size());
+	}
+	sort(sz.begin(), sz.end(), cmp2);
+	for(int i=0; i<sz.size(); ++i)
+	{
+		left -= sz[i];
+		if(left <= 0) return i+1;
+	}
+	return INF;
+}
+
+void solve()
+{
+	while(!pq.empty()) pq.pop();
+	mp.clear();
+	memcpy(vis, cover, sizeof cover);
+	mp.insert(make_pair(0, calc_exp(0, vis)));
+	
+	pq.push(node(0, calc_exp(0, vis)));
+
+	while(!pq.empty())
+	{
+		node now = pq.top();
+		pq.pop();
+
+		int k = analyse(now.st, vis);
+
+		//printf("%I64d %d %d\n", now.st, now.cost, k);
+
+		if(k == top)
+		{
+			printf("%d\n", now.cost);
+			return;
+		}
+
+		int base = now.cost - calc_exp(now.st, vis);
+
+		for(int i=0; i<list.size(); ++i)
+		{
+			if(contain(now.st, i)) continue;
+
+			ll nst = now.st | (1LL<<i);
+			analyse(nst, vis);
+			int ncost = base + 1 + calc_exp(nst, vis);
+
+			it = mp.find(nst);
+			if(it == mp.end())
+			{
+				pq.push(node(nst, ncost));
+				mp.insert(make_pair(nst, ncost));
+			}
+			else if(ncost < it->second)
+			{
+				pq.push(node(nst, ncost));
+				it->second = ncost;
+			}
+		}
+	}
+	puts("INF");
+}
+
+int main()
+{
+	int t;
+	scanf("%d", &t);
+	while(t--)
+	{
+		init();
+		solve();
+	}
+	return 0;
+}
+

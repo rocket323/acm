@@ -1,0 +1,113 @@
+#include <stdio.h>
+#include <cstring>
+#include <stdlib.h>
+#define INF 0x3f3f3f3f
+#define min(a,b) ((a<b)?a:b)
+
+int A[300][300], b[300], n, ret[300];
+char S[16][16];
+
+void go(int i, int j, int r)
+{
+	int c = i * n + j;
+	A[r][c] = 1;
+}
+
+void init()
+{
+	scanf("%d", &n);
+	for(int i=0; i<n; ++i)
+	{
+		scanf("%s", S[i]);
+		for(int j=0; j<n; ++j) b[i*n+j] = (S[i][j] == 'w');
+	}
+
+	memset(A, 0, sizeof A);
+	for(int i=0; i<n; ++i)
+	{
+		for(int j=0; j<n; ++j)
+		{
+			int k = i * n + j;
+			go(i, j, k);
+			if(i > 0) go(i-1, j, k);
+			if(j > 0) go(i, j-1, k);
+			if(i < n-1) go(i+1, j, k);
+			if(j < n-1) go(i, j+1, k);
+		}
+	}
+	n *= n;
+}
+
+void guass()
+{
+	int  kr, kc, tmp, rec = n;
+
+	for(int i=0; i<n; ++i)
+	{
+		kr = -1;
+
+		for(int j=i; j<n; ++j)
+		{
+			if(A[j][i])
+			{
+				kr = j;
+				break;
+			}
+		}
+
+		if(kr == -1){ rec = i; break; }
+
+		for(int j=1; j<n; ++j)
+		{
+			tmp=A[i][j]; A[i][j]=A[kr][j]; A[kr][j]=tmp;
+		}
+
+		tmp = b[i]; b[i] = b[kr]; b[kr] = tmp;
+
+		for(int j=i+1; j<n; ++j)
+		{
+			if(A[j][i])
+			{
+				for(int k=i; k<n; ++k) A[j][k] ^= A[i][k];
+				b[j] ^= b[i];
+			}
+		}
+	}
+
+	for(int i=rec; i<n; ++i)
+	{
+		if(b[i]){ puts("inf"); return; }
+	}
+
+	int ans = INF;
+	for(int x=0; x<(1<<(n-rec)); ++x)
+	{
+		int tmp = 0;
+		for(int j=rec; j<n; ++j){ ret[j] = x & (1<<(j-rec)); tmp += ret[j]; }
+		for(int i=rec-1; i>=0; --i)
+		{
+			ret[i] = b[i];
+			for(int j=n-1; j>i; --j) ret[i] ^= (ret[j] & A[i][j]);
+			tmp += ret[i];
+		}
+		ans = min(ans, tmp);
+	}
+	printf("%d\n", ans);
+}
+
+void solve()
+{
+	guass();
+}
+
+int main()
+{
+	int t, tc = 0;
+	scanf("%d", &t);
+	while(t--)
+	{
+		init();
+		solve();
+	}
+	return 0;
+}

@@ -1,0 +1,113 @@
+#include <stdio.h>
+#include <cstring>
+#define maxl 205
+#define INF 0x3f3f3f3f
+#define min(a,b) ((a<b)?a:b)
+#define go(x) (((x)<m)?(m-(x)):1)
+
+int n, m, f[maxl][maxl][22], pre[maxl], low[maxl][maxl][22];
+int cnt[maxl];
+char T[maxl], S[maxl];
+
+void init()
+{
+    scanf("%s", T);
+    n = 0;
+    for(int i=0; T[i]; ++i)
+    {
+        n++;
+        cnt[n] = 1;
+        S[n] = T[i];
+        while(T[i+1] && T[i+1] == T[i]){ i++; cnt[n]++; }
+    }
+
+    memset(pre, -1, sizeof pre);
+    for(int i=2; i<=n; ++i)
+    {
+        for(int j=i-1; j>=1; --j)
+        {
+            if(S[j] == S[i]){ pre[i] = j; break; }
+        }
+    }
+}
+
+void solve()
+{
+
+    memset(f, 0x3f, sizeof f);
+
+    for(int i=1; i<=n; ++i)
+	{
+		low[i][i][m] = INF;
+        if(cnt[i] >= m) f[i][i][m] = 0;
+		for(int k=m-1; k>=1; --k)
+		{
+			if(k >= cnt[i]) f[i][i][k] = k - cnt[i];
+			low[i][i][k] = min(f[i][i][k], low[i][i][k+1]);
+		}
+		f[i][i][0] = go(cnt[i]);
+        low[i][i][0] = f[i][i][0];
+	}
+
+
+    for(int l=2; l<=n; ++l)
+    {
+        for(int i=1; i<=n-l+1; ++i)
+        {
+            int j = i + l - 1;
+
+            for(int k=1; k<=m; ++k)
+            {
+
+                bool flag = 0;
+                if(i == 2 && j == 3 && k == 2) flag = 1;
+                
+                f[i][j][k] = min(f[i][j][k], f[i][j-1][0] + f[j][j][k]);
+
+                //if(flag) printf("here %d %d
+
+                for(int c=0; c<=k; ++c)
+                {
+                    for(int p=pre[j]; p!=-1; p=pre[p])
+                    {
+                        f[i][j][k] = min(f[i][j][k], f[i][p][c] + f[p+1][j][k-c]);
+                    }
+                }
+            }
+
+
+            f[i][j][0] = min(f[i][j][0], f[i][j-1][0] + f[j][j][0]);
+            for(int p=pre[j]; p!=-1; p=pre[p])
+            {
+                for(int c=1; c<m; ++c)
+                {
+                    f[i][j][0] = min(f[i][j][0], f[i][p][c] + low[p+1][j][m-c]);
+                }
+                f[i][j][0] = min(f[i][j][0], f[i][p][0] + f[p+1][j][0]);
+                f[i][j][0] = min(f[i][j][0], f[i][p][0] + f[p+1][j][m] + 1);
+                f[i][j][0] = min(f[i][j][0], f[i][p][m] + f[p+1][j][0] + 1);
+                f[i][j][0] = min(f[i][j][0], f[i][p][m] + f[p+1][j][m]);
+            }
+
+            low[i][j][0] = f[i][j][0];
+            low[i][j][m-1] = f[i][j][m-1];
+            for(int x=m-2; x>=1; --x) low[i][j][x] = min(low[i][j][x+1], f[i][j][x]);
+
+        }
+    }
+
+    //printf("%d %d\n", cnt[3], f[2][2][0]);
+
+    printf("%d\n", f[1][n][0]);
+}
+
+int main()
+{
+    while(scanf("%d", &m) != EOF)
+    {
+        init();
+        solve();
+    }
+    return 0;
+}
+

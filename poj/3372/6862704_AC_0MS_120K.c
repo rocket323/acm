@@ -1,0 +1,1 @@
+main(n){while(~scanf("%d",&n))puts(n&n-1?"NO":"YES");}

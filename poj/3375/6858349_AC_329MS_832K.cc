@@ -1,0 +1,65 @@
+#include <stdio.h>
+#include <cstring>
+#include <algorithm>
+#define maxl 2010
+#define ADD 2010
+#define INF 0x3f3f3f3f
+#define abs(n) ((n) > 0 ? (n) : -(n))
+using namespace std;
+
+int a[100010], b[maxl], n, m;
+int f[2][2 * maxl], mat[maxl];
+
+void init()
+{
+	for(int i=1; i<=m; ++i) scanf("%d", &a[i]);
+	for(int i=1; i<=n; ++i) scanf("%d", &b[i]);
+
+	sort(a + 1, a + 1 + m);
+	sort(b + 1, b + 1 + n);
+}
+
+void solve()
+{
+	memset(f, 0x3f, sizeof f);
+
+	int now = 1;
+	for(int i=1; i<=n; ++i)
+	{
+		while(now < m && abs(a[now+1] - b[i]) <= abs(a[now] - b[i])) now++;
+		mat[i] = now;
+	}
+
+	int idx = 0, ans = INF;
+
+	memset(f[0], 0, sizeof f[0]);
+
+	for(int i=1; i<=n; ++i)
+	{
+		idx ^= 1;
+		memset(f[idx], 0x3f, sizeof f[idx]);
+		for(int j=-n; j<=n; ++j)
+		{
+			int k = mat[i] + j;
+			if(k < 1 || k > m) continue;
+
+			int pre = k - 1 - mat[i-1];
+			if(pre > n) pre = n;
+			f[idx][j + ADD] = min(f[idx][j + ADD - 1], f[idx^1][pre + ADD] + abs(a[k] - b[i]));
+
+			if(i == n) ans = min(ans, f[idx][j + ADD]);
+		}
+	}
+	printf("%d\n", ans);
+}
+
+int main()
+{
+	while(scanf("%d%d", &m, &n) != EOF)
+	{
+		init();
+		solve();
+	}
+	return 0;
+}
+

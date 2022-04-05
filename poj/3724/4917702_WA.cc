@@ -1,0 +1,101 @@
+#include <iostream>
+#include <string>
+#include <cmath>
+#include <sstream>
+#include <algorithm>
+#define deps 1e-8
+using namespace std;
+
+int n;
+double x[31], y[31], E[21];
+int l[31];
+int a[31], flag;
+
+void init()
+{
+	for(int i=0; i<n; ++i)
+	{
+		char s[200];
+		cin >> x[i];
+		cin >> s;
+		stringstream in;
+		in << s;
+		in >> y[i];
+		
+		int len = strlen(s);
+		int d = 0;
+		while(s[d]!='.') d++;
+		d++;
+		
+		l[i] = 0;
+		//l[i] = len - d;
+		if(l[i] > 0) l[i]--;
+		cout<<l[i]<<endl;
+	}
+	E[0] = 1.0;
+	for(int i=1; i<20; ++i) E[i] = E[i-1] * 0.1;
+}
+
+double mypow(double x, int n)
+{
+	if(n==0) return 1.0;
+	double mid = mypow(x, n/2);
+	if(n&1) return (double)mid * (double)mid * x;
+	else return (double)mid * mid;
+}
+
+int cmp(double y1, int i)
+{
+	double eps = E[l[i]];
+	
+	if(fabs(y1-y[i]) > eps) return 0;
+	else return 1;
+}
+
+int check()
+{
+	for(int i=0; i<n; ++i)
+	{
+		double t = exp(x[i]), tmp = 0;
+		for(int j=0; j<10; ++j)
+		{
+			tmp += mypow(t, a[j]);
+			//if(tmp > y[i]) return 0;
+		}
+		if(!cmp(tmp, i)) return 0;
+	}
+	return 1;
+}
+
+void dfs(int pos, int la)
+{
+	if(flag) return;
+	if(pos==10)
+	{
+		if(check()) flag = 1;
+		return;
+	}
+	for(int i=la; i<=10; ++i)
+	{
+		a[pos] = i;
+		dfs(pos+1, i);
+		if(flag) return;	
+	}
+}
+
+void solve()
+{
+	memset(a, 0, sizeof a);
+	flag = 0;
+	dfs(0, 1);
+	if(!flag) while(1);
+	for(int i=0; i<10; ++i) printf("%d\n", a[i]);
+}
+
+int main()
+{
+		scanf("%d", &n);
+		init();
+		solve();
+	return 0;
+}
