@@ -1,59 +1,28 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-double eps = 1e-8;
-const int maxl = 1e5 + 10;
-int n, d, x[maxl], t;
-double f[maxl];
-bool g[maxl];
-
-bool check(double l) {
-    memset(g, 0, sizeof(g));
-    for (int i = 0; i <= n; i++)
-        f[i] = 0;
-    g[0] = 1;
-    for (int i = 2; i <= n; i++) {
-        if (g[i - 2] && x[i - 1] + l + d >= x[i] - l) {
-            g[i] = 1;
-            double tmp = std::min(x[i - 1] + l + d, x[i] + l);
-            if (tmp > f[i])
-                f[i] = tmp;
-        }
-        if (g[i - 1] && f[i - 1] + d >= x[i] - l) {
-            g[i] = 1;
-            double tmp = std::min(f[i - 1] + d, x[i] + l);
-            if (tmp > f[i])
-                f[i] = tmp;
-        }
-    }
-
-    return g[n];
-}
-
-void solve() {
-    double l = 0, r = 2e9, ans = 0;
-    while (l <= r) {
-        double mid = (l + r) / 2;
-        if (check(mid)) {
-            ans = mid;
-            r = mid - eps;
-        } else {
-            l = mid + eps;
-        }
-    }
-
-    printf("%.8lf\n", ans);
-}
+const int maxl = 20;
+int n, m, a[maxl], t;
 
 int main() {
     scanf("%d", &t);
     while (t--) {
-        scanf("%d%d", &n, &d);
-        for (int i = 1; i <= n; i++) {
-            scanf("%d", &x[i]);
+        scanf("%d%d", &n, &m);
+        int ans = 0;
+        for (int i = 0; i < n; i++) {
+            scanf("%d", &a[i]);
         }
-        sort(x + 1, x + 1 + n);
-        solve();
+        for (int i = 1; i < (1 << n); i++) {
+            int sum = 0;
+            for (int j = 0; j < n; j++) {
+                if (i & (1 << j)) {
+                    sum += a[j];
+                }
+            }
+            if (sum % m == 0)
+                ans++;
+        }
+        cout << ans << endl;
     }
     return 0;
 }
