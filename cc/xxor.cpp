@@ -1,14 +1,14 @@
+#include <assert.h>
 #include <stdio.h>
-#include <cstring>
-#include <vector>
+#include <algorithm>
 #include <cmath>
+#include <cstring>
+#include <iostream>
 #include <map>
 #include <set>
-#include <assert.h>
-#include <string>
-#include <algorithm>
 #include <sstream>
-#include <iostream>
+#include <string>
+#include <vector>
 using namespace std;
 
 typedef long long ll;
@@ -19,15 +19,15 @@ int BS = 0;
 int c1[35], n, m;
 int a[maxl];
 
-struct node
-{
+struct node {
     int l, r, idx;
     unsigned ans;
 } e[maxl];
 
 bool cmp1(const node &a, const node &b) {
     int b1 = a.l / BS, b2 = b.l / BS;
-    if (b1 != b2) return b1 < b2;
+    if (b1 != b2)
+        return b1 < b2;
     return a.r < b.r;
 }
 
@@ -65,10 +65,14 @@ int main() {
     add(0, 1);
     for (int i = 0; i < m; i++) {
         auto &q = e[i];
-        while (l > q.l) add(--l, 1);
-        while (r < q.r) add(++r, 1);
-        while (l < q.l) add(l++, -1);
-        while (r > q.r) add(r--, -1);
+        while (l > q.l)
+            add(--l, 1);
+        while (r < q.r)
+            add(++r, 1);
+        while (l < q.l)
+            add(l++, -1);
+        while (r > q.r)
+            add(r--, -1);
 
         unsigned ans = 0, tot = r - l + 1;
         for (int j = 0; j < 31; j++) {
@@ -85,4 +89,3 @@ int main() {
 
     return 0;
 }
-
