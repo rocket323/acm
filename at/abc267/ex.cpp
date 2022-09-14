@@ -54,7 +54,7 @@ void ntt(vector<int> &a, vector<int> &R, int op) {
     }
 }
 
-void mul(vector<int> &a, vector<int> &b) {
+vector<int> mul(vector<int> a, vector<int> b) {
     int n = a.size(), m = b.size();
     int len = 1, L = 0;
     while (len < n + m - 1) {
@@ -73,9 +73,21 @@ void mul(vector<int> &a, vector<int> &b) {
         a[i] = (ll)a[i] * b[i] % mod;
     }
     ntt(a, R, -1);
+    return a;
 }
 
 int n, m, a[maxl];
+
+poly operator+(const poly &a, const poly &b) {
+    poly res(max(a.size(), b.size()));
+    for (int i = 0; i < res.size(); i++)
+        res[i] = ((i < a.size() ? a[i] : 0) + (i < b.size() ? b[i] : 0)) % mod;
+    return res;
+}
+
+pair<poly, poly> operator+(const pair<poly, poly> &a, const pair<poly, poly> &b) {
+    return make_pair(a.first + b.first, a.second + b.second);
+}
 
 pair<poly, poly> solve(int l, int r) {
     if (l == r) {
@@ -86,6 +98,9 @@ pair<poly, poly> solve(int l, int r) {
     }
 
     int mid = (l + r) / 2;
+    auto &&a = solve(l, mid);
+    auto &&b = solve(mid + 1, r);
+    return make_pair(mul(a.first, b.first) + mul(a.second, b.second), mul(a.first, b.second) + mul(a.second, b.first));
 }
 
 int main() {
@@ -93,5 +108,10 @@ int main() {
     for (int i = 1; i <= n; i++) {
         scanf("%d", &a[i]);
     }
+    auto ans = solve(1, n);
+    if (ans.second.size() <= m)
+        puts("0");
+    else
+        printf("%d\n", (ans.second)[m]);
     return 0;
 }
