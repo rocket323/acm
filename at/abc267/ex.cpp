@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <atcoder/all>
 #include <cstdio>
 #include <cstring>
 #include <iostream>
@@ -7,6 +8,7 @@
 #include <set>
 #include <vector>
 using namespace std;
+using namespace atcoder;
 using ll = long long;
 
 const int inf = 0x3f3f3f3f;
@@ -14,7 +16,8 @@ const int maxl = 2e6 + 10;
 const int mod = 998244353;
 const int G = 3;
 
-using poly = vector<int>;
+using mint = modint998244353;
+using poly = vector<mint>;
 
 ll pow(ll a, ll b) {
     ll ans = 1;
@@ -81,13 +84,13 @@ int n, m, a[maxl];
 poly operator+(const poly &a, const poly &b) {
     poly res(max(a.size(), b.size()));
     for (int i = 0; i < res.size(); i++)
-        res[i] = ((i < a.size() ? a[i] : 0) + (i < b.size() ? b[i] : 0)) % mod;
+        res[i] = ((i < a.size() ? a[i] : 0) + (i < b.size() ? b[i] : 0));
     return res;
 }
 
-pair<poly, poly> operator+(const pair<poly, poly> &a, const pair<poly, poly> &b) {
-    return make_pair(a.first + b.first, a.second + b.second);
-}
+// pair<poly, poly> operator+(const pair<poly, poly> &a, const pair<poly, poly> &b) {
+//     return make_pair(a.first + b.first, a.second + b.second);
+// }
 
 pair<poly, poly> solve(int l, int r) {
     if (l == r) {
@@ -100,7 +103,8 @@ pair<poly, poly> solve(int l, int r) {
     int mid = (l + r) / 2;
     auto &&a = solve(l, mid);
     auto &&b = solve(mid + 1, r);
-    return make_pair(mul(a.first, b.first) + mul(a.second, b.second), mul(a.first, b.second) + mul(a.second, b.first));
+    return make_pair(convolution(a.first, b.first) + convolution(a.second, b.second),
+                     convolution(a.first, b.second) + convolution(a.second, b.first));
 }
 
 int main() {
@@ -112,6 +116,6 @@ int main() {
     if (ans.second.size() <= m)
         puts("0");
     else
-        printf("%d\n", (ans.second)[m]);
+        printf("%d\n", (ans.second)[m].val());
     return 0;
 }
