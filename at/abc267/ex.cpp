@@ -16,6 +16,10 @@ const int G = 3;
 
 using poly = vector<int>;
 
+int n, m, a[maxl], c[11];
+int frac[maxl], ifrac[maxl], inv[maxl];
+pair<poly, poly> ps[11];
+
 ll pow(ll a, ll b) {
     ll ans = 1;
     while (b) {
@@ -25,6 +29,23 @@ ll pow(ll a, ll b) {
         a = a * a % mod;
     }
     return ans;
+}
+
+void init() {
+    frac[0] = 1;
+    for (int i = 1; i < maxl; i++) {
+        frac[i] = (ll)frac[i - 1] * i % mod;
+    }
+    ifrac[maxl - 1] = pow(frac[maxl - 1], mod - 2);
+    for (int i = maxl - 2; i >= 0; i--) {
+        ifrac[i] = (ll)ifrac[i + 1] * (i + 1) % mod;
+    }
+}
+
+int C(int n, int m) {
+    if (n < m || m < 0)
+        return 0;
+    return (ll)frac[n] * ifrac[m] % mod * ifrac[n - m] % mod;
 }
 
 void ntt(vector<int> &a, vector<int> &R, int op) {
@@ -76,8 +97,6 @@ vector<int> mul(vector<int> a, vector<int> b) {
     return a;
 }
 
-int n, m, a[maxl];
-
 poly operator+(const poly &a, const poly &b) {
     poly res(max(a.size(), b.size()));
     for (int i = 0; i < res.size(); i++)
@@ -91,10 +110,7 @@ pair<poly, poly> operator+(const pair<poly, poly> &a, const pair<poly, poly> &b)
 
 pair<poly, poly> solve(int l, int r) {
     if (l == r) {
-        poly u(1), v(a[l] + 1);
-        u[0] = 1;
-        v[a[l]] = 1;
-        return make_pair(u, v);
+        return move(ps[l]);
     }
 
     int mid = (l + r) / 2;
@@ -103,12 +119,31 @@ pair<poly, poly> solve(int l, int r) {
     return make_pair(mul(a.first, b.first) + mul(a.second, b.second), mul(a.first, b.second) + mul(a.second, b.first));
 }
 
+void gao(int x, int cnt) {
+    int size = min(x * cnt + 1, m + 1);
+    ps[x].first.resize(size);
+    ps[x].second.resize(size);
+    for (int i = 0; i <= cnt; i++) {
+        ll j = (ll)i * x;
+        if (j >= size)
+            break;
+        auto &&p = (i & 1) ? ps[x].second : ps[x].first;
+        p[j] = C(cnt, i);
+    }
+}
+
 int main() {
     scanf("%d%d", &n, &m);
     for (int i = 1; i <= n; i++) {
         scanf("%d", &a[i]);
+        c[a[i]]++;
     }
-    auto ans = solve(1, n);
+
+    init();
+    for (int i = 1; i <= 10; i++) {
+        gao(i, c[i]);
+    }
+    auto ans = solve(1, 10);
     if (ans.second.size() <= m)
         puts("0");
     else
