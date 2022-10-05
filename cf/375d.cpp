@@ -32,7 +32,7 @@ struct Set {
     // color => cnt
     unordered_map<int, int> col;
     // (cnt, col)
-    set<pair<int, int>> st;
+    ordered_set<pair<int, int>> st;
 
     Set() {
     }
@@ -53,12 +53,8 @@ struct Set {
         st.insert(make_pair(cnt, color));
     }
     int get(int k) {
-        int count = 0;
-        for (auto &&x : st) {
-            if (x.first >= k)
-                count++;
-        }
-        return count;
+        int count = st.order_of_key({k, 0});
+        return st.size() - count;
     }
 };
 
