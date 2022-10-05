@@ -7,12 +7,14 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <unordered_map>
 #include <vector>
 using namespace std;
 
 typedef long long ll;
 const int maxl = 500010;
 const int mod = 1e9 + 7;
+using uii = unordered_map<int, int>;
 
 struct query {
     int idx, d;
@@ -38,41 +40,38 @@ void dfs1(int u, int d) {
     }
 }
 
-void add(int u, int inc, int p) {
-    int x = s[u] - 'a';
-    cnt[dep[u]][x] += inc;
-
-    for (int v : adj[u]) {
-        if (v != p)
-            add(v, inc, p);
+void merge(uii &h, uii &l) {
+    for (auto &&[k, v] : l) {
+        h[k] += v;
     }
 }
 
-void dfs2(int u, int keep) {
-    for (int v : adj[u]) {
-        if (v != son[u])
-            dfs2(v, 0);
-    }
-
+uii dfs2(int u) {
+    uii h;
     if (son[u])
-        dfs2(son[u], 1);
+        h = dfs2(son[u]);
 
-    add(u, 1, son[u]);
+    for (int v : adj[u]) {
+        if (v != son[u]) {
+            uii l = dfs2(v);
+            merge(h, l);
+        }
+    }
+    uii x = {{dep[u] * 26 + (s[u] - 'a'), 1}};
+    merge(h, x);
 
     // ans the querys
     for (auto &q : e[u]) {
         int d = q->d;
         int odd_cnt = 0;
         for (int i = 0; i < 26; i++) {
-            if (cnt[d][i] & 1)
+            auto iter = h.find(d * 26 + i);
+            if (iter != h.end() && (iter->second & 1))
                 odd_cnt++;
         }
         q->ans = odd_cnt < 2;
     }
-
-    if (!keep) {
-        add(u, -1, 0);
-    }
+    return h;
 }
 
 int main() {
@@ -93,7 +92,7 @@ int main() {
         }
 
         dfs1(1, 1);
-        dfs2(1, 0);
+        dfs2(1);
 
         for (int i = 0; i < m; i++)
             puts(q[i].ans ? "Yes" : "No");
