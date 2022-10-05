@@ -31,7 +31,7 @@ vector<node> query[maxl];
 struct Set {
     // color => cnt
     unordered_map<int, int> col;
-    // (cnt, col)
+    // (cnt, color)
     ordered_set<pair<int, int>> st;
 
     Set() {
