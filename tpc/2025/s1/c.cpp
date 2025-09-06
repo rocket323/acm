@@ -18,15 +18,6 @@ struct node {
 } nd[maxl];
 
 int t, n;
-int higher_cnt;
-
-int findone(int i) {
-    for (int j = i; j < n; j++) {
-        if (higher_cnt <= nd[j].b)
-            return j;
-    }
-    return -1;
-}
 
 int main() {
     scanf("%d", &t);
@@ -40,41 +31,29 @@ int main() {
         sort(nd, nd + n, [](const node &l, const node &r) {
             if (l.a != r.a)
                 return l.a > r.a;
-            return l.b < r.b;
+            return l.b > r.b;
         });
 
         std::vector<int> ans;
-        higher_cnt = 0;
-        int tmp_a = 0, tmp_cnt = 0;
-        for (int i = 0; i < n;) {
-            if (tmp_a > 0 && tmp_a != nd[i].a) {
-                higher_cnt += tmp_cnt;
-                tmp_a = 0;
-                tmp_cnt = 0;
-            }
-
-            int j = findone(i);
-            if (j < 0)
-                break;
-
-            int k = findone(j + 1);
-            if (k >= 0) {
-                if (nd[j].a > nd[k].a && higher_cnt + tmp_cnt + 1 > nd[k].b) {
-                    i = k;
-                    continue;
+        int i = 0;
+        while (i < n) {
+            int j = i, idx = -1, num = -1;
+            while (j < n && nd[j].a == nd[i].a) {
+                int tmp = (j - i + 1) + min((int)ans.size(), nd[j].b);
+                if (tmp > num) {
+                    idx = j;
+                    num = tmp;
                 }
+                j++;
             }
-
-            ans.push_back(nd[j].idx);
-            if (tmp_a == nd[j].a) {
-                tmp_cnt++;
-            } else {
-                higher_cnt += tmp_cnt;
-                tmp_a = nd[j].a;
-                tmp_cnt = 1;
+            if (num > ans.size()) {
+                int b = nd[idx].b;
+                while (ans.size() > b)
+                    ans.pop_back();
+                for (int x = i; x <= idx; x++)
+                    ans.push_back(nd[x].idx);
             }
-
-            i = j + 1;
+            i = j;
         }
         sort(ans.begin(), ans.end());
         printf("%d\n", (int)ans.size());
