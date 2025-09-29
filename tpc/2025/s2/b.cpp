@@ -28,7 +28,7 @@ ll calc(ll x, ll k, ll y) {
 }
 
 ll calc0() {
-    ll k = -1, drink = -1, l = 2, r = inf;
+    ll k = 1, drink = inf, l = 2, r = inf;
     while (l <= r) {
         ll mid = (l + r) / 2;
         ll c = calc(x, mid, y);
@@ -77,7 +77,6 @@ int main() {
         cin >> x >> y;
         ll a = calc0();
         ll b = calc2();
-
         if (a == -1 && b == -1) {
             cout << "Impossible" << endl;
         } else if (a > b) {
